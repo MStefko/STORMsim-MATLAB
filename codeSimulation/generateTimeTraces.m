@@ -2,36 +2,39 @@ function stacks = generateTimeTraces(Optics, Cam, Fluo, Grid)
 %Generate the image sequence of blinking emitters.
 %
 %Inputs:
-% hRoot                 handles to SOFIsim interfaces [Figure] 
-% intensity_peak_mode   boolean specifying whether the simulation is based 
-%                       on the intensity peak and S/B or on the signal per 
-%                       frame and background
-% tutorial              boolean specifying whether analog time traces 
-%                       should be computed or not
-
-% Copyright © 2015 Arik Girsault 
-% École Polytechnique Fédérale de Lausanne,
-% Laboratoire d'Optique Biomédicale, BM 5.142, Station 17, 1015 Lausanne, Switzerland.
-% arik.girsault@epfl.ch, tomas.lukes@epfl.ch
-% http://lob.epfl.ch/
- 
-% This file is part of SOFIsim.
+% Optics: struct
+% Cam: struct
+% Fluo: struct
+% Grid: struct
 %
-% SOFIsim is free software: you can redistribute it and/or modify
+%Outputs:
+% stacks: 3-dimensional array of pixel values containing individual
+%         frames
+
+% Author: Marcel Stefko
+% Copyright © 2017 Laboratory of Experimental Biophysics,
+% École Polytechnique Fédérale de Lausanne
+% marcel.stefko@epfl.ch
+ 
+% This file is part of STORMsim, a software package for simulating 
+% fluorescent microscopy data.
+%
+% Several parts of this package's core were adapted under GPL from SOFIsim,
+% a package developed by Arik Girsault and Tomas Lukes of Laboratoire 
+% d'Optique Biomédicale at EPFL. <http://lob.epfl.ch/>
+%
+% STORMsim is free software: you can redistribute it and/or modify
 % it under the terms of the GNU General Public License as published by
 % the Free Software Foundation, either version 3 of the License, or
 % (at your option) any later version.
 %
-% SOFIsim is distributed in the hope that it will be useful,
+% STORMsim is distributed in the hope that it will be useful,
 % but WITHOUT ANY WARRANTY; without even the implied warranty of
 % MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 % GNU General Public License for more details.
 %
 % You should have received a copy of the GNU General Public License
-% along with SOFIsim.  If not, see <http://www.gnu.org/licenses/>.
-
-% check whether the simulation is based on the intensity peak and S/B 
-% or on the signal per frame and background
+% along with STORMsim.  If not, see <http://www.gnu.org/licenses/>.
 
 % conversion of time unit in frames
 Fluo.Ton = Fluo.Ton * Cam.acq_speed; 
