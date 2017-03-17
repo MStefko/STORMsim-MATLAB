@@ -1,4 +1,4 @@
-function [grid,analog]=simStacksCore(frames,Optics,Cam,Fluo,Grid,intensity_peak_mode,tutorial)
+function [grid,analog]=simStacksCore(frames,Optics,Cam,Fluo,Grid)
 %Simulate an image sequence of blinking emitters.
 %
 %Inputs:
@@ -9,11 +9,6 @@ function [grid,analog]=simStacksCore(frames,Optics,Cam,Fluo,Grid,intensity_peak_
 % Fluo                  parameters of the fluorophore and sample 
 %                       fluorescent properties [struct]
 % Grid                  parameters of the sampling grid [struct]
-% intensity_peak_mode   boolean specifying whether the simulation is based 
-%                       on the intensity peak and S/B or on the signal per 
-%                       frame and background
-% tutorial              boolean specifying whether analog time traces 
-%                       should be computed or not
 %
 %Outputs:
 % stacks.analog      Analog signal - Diffraction-limited 
@@ -43,10 +38,8 @@ function [grid,analog]=simStacksCore(frames,Optics,Cam,Fluo,Grid,intensity_peak_
 % along with SOFIsim.  If not, see <http://www.gnu.org/licenses/>.
 
 s_xy = Optics.fwhm_digital/2.3548;
-s_xy_analog = Grid.blckSize*s_xy;
 
 r = 3*s_xy;
-r_analog = Grid.blckSize*r;
 
 emitter_position = Fluo.emitters; % x and y positions of each emitters
 Nemitters = size(emitter_position,1);
@@ -63,12 +56,6 @@ end
 [gridX,gridY] = meshgrid(1:Grid.sx,1:Grid.sy); % pixel number within the camera
 grid = zeros(Grid.sy,Grid.sx,frames); % pixel values of the camera for all frames
 
-% check whether analog image sequence should be calculated
-if tutorial
-    % Analog Signal
-    [analogX,analogY] = meshgrid(1:Grid.blckSize*Grid.sx,1:Grid.blckSize*Grid.sy); % pixel number within the camera
-    analog = zeros(Grid.blckSize*Grid.sy,Grid.blckSize*Grid.sx,frames); % pixel values of the camera for all frames
-end
 
 % Diffraction
 fig = statusbar('Diffraction...',fig);
@@ -82,32 +69,6 @@ for m=1:Nemitters
                          (erf((y(k)-emitter_position(m,2)+0.5)/(sqrt(2)*s_xy)) - erf((y(k)-emitter_position(m,2)-0.5)/(sqrt(2)*s_xy)));
     end
     clear x y;
-    
-    % check whether analog image sequence should be calculated
-    if tutorial
-        % Analog Grid
-        [x,y]=ind2sub(size(analog),find((analogY - Grid.blckSize*emitter_position(m,1)).^2 + (analogX - Grid.blckSize*emitter_position(m,2)).^2 <=  r_analog^2 == 1));
-        for k=1:length(x)
-            analog(x(k),y(k),:)= squeeze(analog(x(k),y(k),:)).' + 0.25*emitter_brightness(m,:)*...
-                             (erf((x(k)-Grid.blckSize*emitter_position(m,1)+0.5)/(sqrt(2)*s_xy_analog)) - erf((x(k)-Grid.blckSize*emitter_position(m,1)-0.5)/(sqrt(2)*s_xy_analog))).*...
-                             (erf((y(k)-Grid.blckSize*emitter_position(m,2)+0.5)/(sqrt(2)*s_xy_analog)) - erf((y(k)-Grid.blckSize*emitter_position(m,2)-0.5)/(sqrt(2)*s_xy_analog)));
-        end
-        clear x y;
-    end
-end
-
-% check whether analog image sequence should be calculated
-if ~tutorial
-    analog = 0;
-end
-clear analogX analogY s_xy_analog r_analog gridX gridY emitter_brightness s_xy r;
-
-% rescale the intensity of the image sequence according to the intensity
-% peak (if necessary)
-if intensity_peak_mode
-    Imax = max(max(mean(grid,3)));
-    weight = (Fluo.Peak/Imax)/Cam.quantum_gain; clear Imax;    
-    grid = weight.*grid;clear weight;
 end
 
 % add poisson noise
@@ -117,13 +78,6 @@ for frame = 1:frames
     grid(:,:,frame) = imnoise(uint16(max(0,grid(:,:,frame)-Fluo.background)+Fluo.background),'poisson');
 end
 delete(fig);
-
-% rescale intensity after adding poissonian noise
-if intensity_peak_mode
-    Imax = max(max(mean(grid,3)));
-    weight = (Fluo.Peak/Imax)/Cam.quantum_gain; clear Imax;
-    grid = weight.*grid;clear weight;
-end
 
 end
 

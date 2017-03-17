@@ -1,4 +1,4 @@
-function stacks=simStacks(frames,Optics,Cam,Fluo,Grid,intensity_peak_mode,tutorial)
+function stacks=simStacks(frames,Optics,Cam,Fluo,Grid)
 
 %Simulate the acquisition of an image sequence of blinking emitters.
 %
@@ -10,11 +10,6 @@ function stacks=simStacks(frames,Optics,Cam,Fluo,Grid,intensity_peak_mode,tutori
 % Fluo                  parameters of the fluorophore and sample 
 %                       fluorescent properties [struct]
 % Grid                  parameters of the sampling grid [struct]
-% intensity_peak_mode   boolean specifying whether the simulation is based 
-%                       on the intensity peak and S/B or on the signal per 
-%                       frame and background
-% tutorial              boolean specifying whether analog time traces 
-%                       should be computed or not
 %
 %Outputs:
 % stacks.analog      Analog signal - Diffraction-limited 
@@ -43,10 +38,10 @@ function stacks=simStacks(frames,Optics,Cam,Fluo,Grid,intensity_peak_mode,tutori
 % You should have received a copy of the GNU General Public License
 % along with SOFIsim.  If not, see <http://www.gnu.org/licenses/>.
 
-stacks =struct;
+stacks =struct();
 
 % Generating Diffraction-Limited and Noisy Brightness Profiles
-[grid,stacks.analog]=simStacksCore(frames,Optics,Cam,Fluo,Grid,intensity_peak_mode,tutorial);
+grid=simStacksCore(frames,Optics,Cam,Fluo,Grid);
 
 % Discretization: photoelectron conversion, electron multiplication,
 % readout and thermal noise
