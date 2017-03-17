@@ -13,8 +13,7 @@ function [ Optics, Cam, Fluo, Grid ] = calcMaskedParameters( Optics, Cam, Fluo, 
 %
 % Several parts of this package's core were adapted under GPL from SOFIsim,
 % a package developed by Arik Girsault and Tomas Lukes of Laboratoire 
-% d'Optique Biomédicale at EPFL. <http://lob.epfl.ch/> Individual file 
-% authorship is defined in file headers. 
+% d'Optique Biomédicale at EPFL. <http://lob.epfl.ch/> 
 %
 % STORMsim is free software: you can redistribute it and/or modify
 % it under the terms of the GNU General Public License as published by
@@ -36,7 +35,6 @@ Cam.quantum_gain = Cam.quantum_efficiency * Cam.gain; % # of electrons per incom
 [pattern,Fluo.emitters] = emitterGen(Fluo.number,'number',Grid,Cam,Optics);
 Optics.object = pattern; clear pattern;
 Optics.frames = Cam.acq_speed * Fluo.duration; % number of frames acquired during the experiment
-% ---- end user-masked parameters;
 
 end
 

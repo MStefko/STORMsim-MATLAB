@@ -8,8 +8,7 @@
 %
 % Several parts of this package's core were adapted under GPL from SOFIsim,
 % a package developed by Arik Girsault and Tomas Lukes of Laboratoire 
-% d'Optique Biomédicale at EPFL. <http://lob.epfl.ch/> Individual file 
-% authorship is defined in file headers. 
+% d'Optique Biomédicale at EPFL. <http://lob.epfl.ch/>
 %
 % STORMsim is free software: you can redistribute it and/or modify
 % it under the terms of the GNU General Public License as published by

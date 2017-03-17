@@ -1,4 +1,4 @@
-function [grid,analog]=simStacksCore(frames,Optics,Cam,Fluo,Grid)
+function grid=simStacksCore(frames,Optics,Cam,Fluo,Grid)
 %Simulate an image sequence of blinking emitters.
 %
 %Inputs:
@@ -11,9 +11,7 @@ function [grid,analog]=simStacksCore(frames,Optics,Cam,Fluo,Grid)
 % Grid                  parameters of the sampling grid [struct]
 %
 %Outputs:
-% stacks.analog      Analog signal - Diffraction-limited 
-%                    [numel(x) x numel(y) x frames]
-% stacks.discrete    Discrete signal prior to camera acquisition
+% grid               Discrete signal prior to camera acquisition
 %                    Image sequence [numel(x) x numel(y) x frames]
 
 % Author: Marcel Stefko

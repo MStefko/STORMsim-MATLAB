@@ -68,20 +68,6 @@ if strcmp(genType,'random')
         y = 2 + (Grid.sx - 3)*rand(nPulses,1);
         %emitters_position = 2 + [(Grid.sy - 3)*rand(nPulses,1),(Grid.sx - 3)*rand(nPulses,1)];
     end
-elseif strcmp(genType,'fromCsv')
-    sample_area = Grid.sx*Grid.sy*pixel_area; % in [um^2]
-    [filename, pathname, filterindex] = uigetfile('*.csv','Choose .csv file');
-    if filterindex==0
-        [x,y,nPulses,dPulses,sizePattern] = templateDistribution(def,Grid,'random',pixel_area,offset);
-    elseif filterindex==2
-        if not(any(regexp(filename,'.csv$')))
-            [x,y,nPulses,dPulses,sizePattern] = templateDistribution(def,Grid,'random',pixel_area,offset);
-        end
-    else
-        csv_filepath = strcat(pathname,filename);
-        [x,y,nPulses,dPulses,sizePattern] = parseCsvDistribution( csv_filepath, sample_area);      
-    end
-    
 
 elseif strcmp(genType,'circular')
     % Radius min and max
@@ -208,101 +194,6 @@ elseif strcmp(genType,'siemens star')
     end
     x=(x+Grid.sy)/2;y=(y+Grid.sx)/2;
     % figure,scatter(x,y);
-    
-elseif strcmp(genType, 'user defined')
-    [FileName,PathName] = uigetfile({'*.bmp';'*.gif';'*.cur';'*.hdf';...
-        '*.jpg';'*.jpeg';'*.jp2';'*.jpx';'*.pbm';'*.pcx';'*.pgm';'*.png';...
-        '*.pnm';'*.ppm';'*.ras';'*.tif';'*.tiff';'*.xwd'},'Select a binary square image');
-    % If the selected image is not binary, the software will convert into a
-    % binary image by setting half of the pixels to 1, namely those with the highest GSV, and
-    % the other half to 0. In addition, if the selected image has more than two dimensions, 
-    % it will be replaced by a random distribution. Moreover, if the number of emitters exceeds the
-    % dimensions of the object, the number of emitters will be truncated to
-    % the dimensions of the object. Finally if the selected image lack
-    % square dimensions, part of the image will truncated to have square dimensions.
-    % 
-    if ~isnumeric(FileName)
-        path = strcat(PathName,FileName);clear PathName;
-        
-        pattern = imread(path);
-        L=size(pattern,1);K=size(pattern,2);
-        if(size(pattern,3)>1 && length(size(pattern))<4)        
-            pattern = pattern(:,:,1);
-            display('The image is not two-dimensional after import in Matlab. Warning: data was cropped to 2D.');
-        end
-        if(size(pattern,3)==1) % check the data isn't three dimensional
-            if L>K
-                pattern(1:L-K,:)=[];
-                L=K;
-            elseif L<K
-                pattern(:,1:K-L)=[];
-                K=L;
-            else
-                display('Problem resizing data. Please enter a square image and try again');
-            end
-            % scales the image between 0 and 1
-            pattern = (pattern - min(pattern(:)))/(max(pattern(:))-min(pattern(:)));
-            % transform the image to binary if it isn't
-            pattern(pattern >= 0.5)=1; pattern(pattern < 0.5)=0;
-            % determine the object region in the image
-            [indx,indy]=find(pattern);
-            
-            sample_area = length(indx)*pixel_area; % in [um^2]
-            if def < 0 % def is the density of pulses
-                dPulses = -def;
-                nPulses = round(dPulses * sample_area); 
-            else % def is the number of pulses
-                dPulses = def/sample_area;
-                nPulses = def;
-            end
-            clear sample_area;
-            
-            % truncates the number of emitters if it is too high
-            %if nPulses > length(indx); nPulses=length(indx);end; 
-            % extract random emitter positions from the object region            
-            pos = 1+floor((length(indy)-1)*rand(1,nPulses));
-            x=indx(pos)+(2*rand(nPulses,1)-1);
-            y=indy(pos)+(2*rand(nPulses,1)-1);
-            % remove border pixels
-            pos_to_remove = (x<=1 | x>=K | y<=1 | y>=L);
-            x(pos_to_remove)=[];
-            y(pos_to_remove)=[];
-            if sum(pos_to_remove)
-                nPulses = nPulses-sum(pos_to_remove);
-                dPulses = nPulses/(length(indx)*pixel_area); % in [um^2]
-            end
-            sizePattern = L;clear pos pos_to_remove;
-            % figure,scatter(x,y);
-        else
-            display('Please enter 2D images. Random distribution of fluorophores has been loaded instead');
-            sample_area = Grid.sx*Grid.sy*pixel_area; % in [um^2]
-            if def < 0 % def is the density of pulses
-                dPulses = -def;
-                nPulses = round(dPulses * sample_area); 
-            else % def is the number of pulses
-                dPulses = def/sample_area;
-                nPulses = def;
-            end
-            clear sample_area;
-            
-            x = 2 + (Grid.sy - 3)*rand(nPulses,1);
-            y = 2 + (Grid.sx - 3)*rand(nPulses,1);
-        end
-    else
-        display('Please select a compatible image format. Random distribution of fluorophores has been loaded instead');
-        sample_area = Grid.sx*Grid.sy*pixel_area; % in [um^2]
-        if def < 0 % def is the density of pulses
-            dPulses = -def;
-            nPulses = round(dPulses * sample_area); 
-        else % def is the number of pulses
-            dPulses = def/sample_area;
-            nPulses = def;
-        end
-        clear sample_area;
-        
-        x = 2 + (Grid.sy - 3)*rand(nPulses,1);
-        y = 2 + (Grid.sx - 3)*rand(nPulses,1);
-    end
 else
 end
 
