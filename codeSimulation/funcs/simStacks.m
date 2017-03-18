@@ -41,8 +41,6 @@ function stacks=simStacks(frames,Optics,Cam,Fluo,Grid)
 % along with STORMsim.  If not, see <http://www.gnu.org/licenses/>.
 
 
-stacks =struct();
-
 % Generating Diffraction-Limited and Noisy Brightness Profiles
 grid=simStacksCore(frames,Optics,Cam,Fluo,Grid);
 

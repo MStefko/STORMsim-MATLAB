@@ -51,7 +51,7 @@ emitter_brightness = zeros(size(emitter_position,1),frames);
 fig = statusbar('Brightness...');
 for k=1:Nemitters
     fig = statusbar(k/Nemitters,fig);
-    emitter_brightness(k,:) = brightness(Fluo.Ion,Fluo.Ton,Fluo.Toff,Fluo.Tbl,frames);
+    emitter_brightness(k,:) = brightness_Marcel(Fluo.Ion,Fluo.Ton,Fluo.Toff,Fluo.Tbl,frames,4);
 end
 
 % Discrete Signal
@@ -80,6 +80,71 @@ for frame = 1:frames
     grid(:,:,frame) = imnoise(uint16(max(0,grid(:,:,frame)-Fluo.background)+Fluo.background),'poisson');
 end
 delete(fig);
+
+end
+
+
+function photons=brightness_Marcel(Ion,Ton,Toff,Tbl,frames, upsample)
+%Simulate the intensity trace of an emitter (photons per frame).
+%
+%Inputs:
+% Ion       maximum signal per emitter per frame [photons]
+% Ton       average duration of the on-state [frames]
+% Toff      average duration of the off-state [frames]
+% Tbl       bleaching lifetime [frames]
+% frames    number of frames comprising the image sequence [frames]
+%
+%Outputs:
+% photons   intensity trace of an emitter [photons]
+
+% We assume that the time of stay in both on and off states follows an
+% exponential distribution (similar to atom decay - the probability of
+% switching from one state to another in the next time interval is 
+% independent of elapsed time). This means that mean lifetimes Ton and 
+% Toff serve as time constants in these distributions. 
+
+% Both states can as well decay into the bleached state. First we compute
+% if the fluorophore will bleach before end of measurement.
+
+if upsample
+    Ion=Ion*upsample; Ton=Ton*upsample; Toff=Toff*upsample;
+    Tbl=Tbl*upsample; frames=frames*upsample;
+end
+
+frame_of_bleach = exprnd(Tbl);
+% this will be true of we need to care about bleaching
+does_bleach = frame_of_bleach < frames;
+
+% determine if we start in an on-state or off-state
+current_state = rand < Ton/(Ton+Toff);
+
+current_time = 1;
+photons = zeros(frames,1); % preallocate photon array
+while current_time <= frames 
+    if current_state % if we are on
+        state_lifetime = exprnd(Ton);
+    else
+        state_lifetime = exprnd(Toff);
+    end
+    next_time = current_time+state_lifetime;
+    if next_time > frames
+        next_time = frames + 0.5;
+    end
+    if current_state
+        photons(ceil(current_time):floor(next_time)) = Ion;
+    end
+    
+    current_time = next_time;
+    current_state = not(current_state);
+end
+if does_bleach
+    photons(ceil(frame_of_bleach):end) = 0;
+end
+
+if upsample
+    photons = movmean(photons,5);
+    photons = downsample(photons,upsample);
+end
 
 end
 

@@ -50,9 +50,9 @@ switch choice
         Fluo.duration = 6; % acquisition time [s]
         Fluo.Ion = 400; % signal [photons]
         Fluo.background = 2; % background [photons]
-        Fluo.Ton = 20 * 1e-3; % on-time ms ->[s]
-        Fluo.Toff = 80 * 1e-3; % off-time ms -> [s]
-        Fluo.Tbl = 80; % bleaching time [s]
+        Fluo.Ton = 80 * 1e-3; % on-time ms ->[s]
+        Fluo.Toff = 300 * 1e-3; % off-time ms -> [s]
+        Fluo.Tbl = 6; % bleaching time [s]
         Fluo.radius = sqrt(64) * 1e-9; % square root of absorption cross-section nm -> [m]
 
         Grid = struct();
