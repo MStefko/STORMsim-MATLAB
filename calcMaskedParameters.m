@@ -27,7 +27,7 @@ function [ Optics, Cam, Fluo, Grid ] = calcMaskedParameters( Optics, Cam, Fluo, 
 %
 % You should have received a copy of the GNU General Public License
 % along with STORMsim.  If not, see <http://www.gnu.org/licenses/>.
-
+Fluo.Ion = Fluo.photons_per_second / Cam.acq_speed; % signal [photons/frame]
 Grid.blckSize = 3;
 Cam.thermal_noise = Cam.dark_current/Cam.acq_speed; % # of electrons per pixel per frame at ambiant air (+20°C)
 Cam.quantum_gain = Cam.quantum_efficiency * Cam.gain; % # of electrons per incoming photon ;

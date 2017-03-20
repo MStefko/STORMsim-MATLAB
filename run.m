@@ -29,7 +29,7 @@ switch choice
     case 'Open'
         [filename, pathname, filterindex] = uigetfile('*.csv','Select the fluorophore .csv file.');
         filepath = fullfile(pathname, filename);
-        [Optics, Cam, Fluo, Grid] = parseCsvFluorophoreFile(filepath)
+        [Optics, Cam, Fluo, Grid] = parseCsvFluorophoreFile(filepath);
         [Optics, Cam, Fluo, Grid] = calcMaskedParameters( Optics, Cam, Fluo, Grid);
     case 'Default'
         Optics = struct();
@@ -46,13 +46,13 @@ switch choice
         Cam.pixel_size = 6.45 * 1e-6; % um -> [m]
 
         Fluo = struct();
+        Fluo.photons_per_second = 40000; % signal [photons/s]
         Fluo.number = 200; % number of fluorophores [-]
         Fluo.duration = 6; % acquisition time [s]
-        Fluo.Ion = 400; % signal [photons]
         Fluo.background = 2; % background [photons]
         Fluo.Ton = 80 * 1e-3; % on-time ms ->[s]
         Fluo.Toff = 300 * 1e-3; % off-time ms -> [s]
-        Fluo.Tbl = 6; % bleaching time [s]
+        Fluo.Tbl = 4; % bleaching time [s]
         Fluo.radius = sqrt(64) * 1e-9; % square root of absorption cross-section nm -> [m]
 
         Grid = struct();

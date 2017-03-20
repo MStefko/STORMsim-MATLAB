@@ -51,7 +51,9 @@ emitter_brightness = zeros(size(emitter_position,1),frames);
 fig = statusbar('Brightness...');
 for k=1:Nemitters
     fig = statusbar(k/Nemitters,fig);
-    emitter_brightness(k,:) = brightness_Marcel(Fluo.Ion,Fluo.Ton,Fluo.Toff,Fluo.Tbl,frames,4);
+    [emitter_brightness(k,:), emitter_state] = brightness_marcel2(Fluo.Ion,Fluo.Ton,Fluo.Toff,Fluo.Tbl,frames);
+    %plot([1:frames], emitter_brightness(k,:), [1:frames] + 0.5, 0.5*Fluo.Ion*emitter_state, 'xr');
+    %pause;
 end
 
 % Discrete Signal
@@ -101,16 +103,15 @@ function photons=brightness_Marcel(Ion,Ton,Toff,Tbl,frames, upsample)
 % exponential distribution (similar to atom decay - the probability of
 % switching from one state to another in the next time interval is 
 % independent of elapsed time). This means that mean lifetimes Ton and 
-% Toff serve as time constants in these distributions. 
-
-% Both states can as well decay into the bleached state. First we compute
-% if the fluorophore will bleach before end of measurement.
-
+% Toff serve as time constants in these distributions. Both states can 
+% as well decay into the bleached state. 
 if upsample
     Ion=Ion*upsample; Ton=Ton*upsample; Toff=Toff*upsample;
     Tbl=Tbl*upsample; frames=frames*upsample;
 end
 
+% First we compute
+% if the fluorophore will bleach before end of measurement.
 frame_of_bleach = exprnd(Tbl);
 % this will be true of we need to care about bleaching
 does_bleach = frame_of_bleach < frames;
@@ -147,6 +148,104 @@ if upsample
 end
 
 end
+
+function [photons, state_bool] = brightness_marcel2(Ion,Ton,Toff,Tbl,frames)
+%Simulate the intensity trace of an emitter (photons per frame).
+%
+%Inputs:
+% Ion       maximum signal per emitter per frame [photons]
+% Ton       average duration of the on-state [frames]
+% Toff      average duration of the off-state [frames]
+% Tbl       bleaching lifetime [frames]
+% frames    number of frames comprising the image sequence [frames]
+%
+%Outputs:
+% photons      intensity trace of an emitter [photons]
+% state_bool   was the emitter on at each frame? [bool array]
+
+% We assume that the time of stay in both on and off states follows an
+% exponential distribution (similar to atom decay - the probability of
+% switching from one state to another in the next time interval is 
+% independent of elapsed time). This means that mean lifetimes Ton and 
+% Toff serve as time constants in these distributions. Both states can 
+% as well decay into the bleached state. 
+
+% First we compute
+% if the fluorophore will bleach before end of measurement.
+time_of_bleach = exprnd(Tbl);
+% this will be true of we need to care about bleaching
+does_bleach = time_of_bleach < frames;
+
+% determine if we start in an on-state or off-state
+current_state = rand < Ton/(Ton+Toff);
+current_time = 0;
+current_frame = 1;
+photons = zeros(frames,1); % preallocate photon array
+state_bool = false(frames,1);
+while current_frame <= frames
+    if current_state % if we are on
+        state_lifetime = exprnd(Ton);
+        if current_frame == frames
+            photons(current_frame) = poissrnd(Ion*min([state_lifetime,1]));
+            break;
+        end
+        % now we bring current_time up to a whole number
+        diff = ceil(current_time) - current_time;
+        if (diff>0)
+            if (diff <= state_lifetime) && (diff>0)
+                state_lifetime = state_lifetime - diff;
+                photons(current_frame) = photons(current_frame) + poissrnd(Ion*diff);
+                current_time = ceil(current_time);
+                current_frame = current_frame + 1;
+                if state_lifetime <= 0
+                    current_state = false;
+                    continue;
+                end
+
+            else % we are only within the frame
+                photons(current_frame) = photons(current_frame) + poissrnd(Ion*diff);
+                current_time = current_time + diff;
+                current_state = false;
+                continue;
+            end
+        end
+        % now we are sure we are at integer value of current_time
+        while (state_lifetime > 1) && (current_frame < frames)
+            photons(current_frame) = poissrnd(Ion);
+            state_bool(current_frame) = true;
+            state_lifetime = state_lifetime - 1;
+            current_time = current_time + 1;
+            current_frame = current_frame + 1;
+        end
+        if current_frame == frames
+            photons(current_frame) = poissrnd(Ion*min([state_lifetime,1]));
+            break;
+        end
+        % current_time is integer, state_lifetime is smaller than 1
+        state_bool(current_frame) = true;
+        photons(current_frame) = poissrnd(Ion*state_lifetime);
+        current_time = current_time + state_lifetime;
+        current_state = false;
+        continue;
+    else
+        state_lifetime = exprnd(Toff);
+        current_time = current_time + state_lifetime;
+        current_frame = ceil(current_time);
+        current_state = true;
+        continue;
+    end
+end
+
+if does_bleach
+    if time_of_bleach < 1
+        time_of_bleach = 1;
+    end
+    photons(floor(time_of_bleach):end) = 0;
+    state_bool(floor(time_of_bleach):end) = false;
+end
+
+end
+
 
 function photons=brightness(Ion,Ton,Toff,Tbl,frames)
 %Simulate the intensity trace of an emitter (photons per frame).
