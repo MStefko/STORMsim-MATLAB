@@ -46,10 +46,10 @@ switch choice
         Cam.pixel_size = 6.45 * 1e-6; % um -> [m]
 
         Fluo = struct();
-        Fluo.photons_per_second = 40000; % signal [photons/s]
-        Fluo.number = 200; % number of fluorophores [-]
+        Fluo.photons_per_second = 4000000; % signal [photons/s]
+        Fluo.number = 400; % number of fluorophores [-]
         Fluo.duration = 6; % acquisition time [s]
-        Fluo.background = 2; % background [photons]
+        Fluo.background = 200; % background [photons]
         Fluo.Ton = 80 * 1e-3; % on-time ms ->[s]
         Fluo.Toff = 300 * 1e-3; % off-time ms -> [s]
         Fluo.Tbl = 4; % bleaching time [s]
@@ -67,9 +67,20 @@ end
 
 choice = questdlg('Generate image stack now?','Generate stack','Yes','No','No');
 if strcmp(choice,'Yes')
-    stacks = generateTimeTraces(Optics, Cam, Fluo, Grid);
+    stack = generateTimeTraces(Optics, Cam, Fluo, Grid);
     doSave = questdlg('Save .tif image stack now?','Save stack','Yes','No','No');
     if strcmp(doSave,'Yes')
-        saveTiff(stacks, Optics, Cam, Fluo, Grid);
+        saveTiff(stack.pixels, Optics, Cam, Fluo, Grid);
     end
 end
+
+choice = questdlg('Save state now?','Save state','Yes','No','No');
+if strcmp(choice,'Yes')
+    saveState(Optics,Cam,Fluo,Grid);
+end
+choice = questdlg('Save short emitter state?','Save state','Yes','No','No');
+if strcmp(choice,'Yes')
+    saveEmitterStateShort(stack);
+end
+
+

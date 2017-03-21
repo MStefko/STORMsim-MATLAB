@@ -1,4 +1,4 @@
-function stacks=simStacks(frames,Optics,Cam,Fluo,Grid)
+function stack=simStacks(frames,Optics,Cam,Fluo,Grid)
 
 %Simulate the acquisition of an image sequence of blinking emitters.
 %
@@ -12,8 +12,11 @@ function stacks=simStacks(frames,Optics,Cam,Fluo,Grid)
 % Grid                  parameters of the sampling grid [struct]
 %
 %Outputs:
-% stacks             Discrete signal as acquired by the camera 
+% stack [struct]            
+%  - pixels          Discrete signal as acquired by the camera 
 %                    Image sequence [numel(x) x numel(y) x frames]
+%  - emitter_state   Boolean array of state of emitter per each frame
+%                    [N_emitters x frames]
 
 % Author: Marcel Stefko
 % Copyright © 2017 Laboratory of Experimental Biophysics
@@ -39,16 +42,16 @@ function stacks=simStacks(frames,Optics,Cam,Fluo,Grid)
 %
 % You should have received a copy of the GNU General Public License
 % along with STORMsim.  If not, see <http://www.gnu.org/licenses/>.
-
+stack = struct();
 
 % Generating Diffraction-Limited and Noisy Brightness Profiles
-grid=simStacksCore(frames,Optics,Cam,Fluo,Grid);
+[grid, stack.emitter_state]=simStacksCore(frames,Optics,Cam,Fluo,Grid);
 
 % Discretization: photoelectron conversion, electron multiplication,
 % readout and thermal noise
 fig = statusbar('Discretization...');
 for frame = 1:frames
-    stacks(:,:,frame) = uint16(gamrnd(grid(:,:,frame),Cam.quantum_gain) + Cam.readout_noise*(randn(Grid.sy,Grid.sx)) + Cam.thermal_noise*randn(Grid.sy,Grid.sx));
+    [stack.pixels(:,:,frame)] = uint16(gamrnd(grid(:,:,frame),Cam.quantum_gain) + Cam.readout_noise*(randn(Grid.sy,Grid.sx)) + Cam.thermal_noise*randn(Grid.sy,Grid.sx));
     fig = statusbar(frame/frames,fig);
 end
 delete(fig);clear grid;

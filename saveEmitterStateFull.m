@@ -1,22 +1,18 @@
-function stacks = generateTimeTraces(Optics, Cam, Fluo, Grid)
-%Generate the image sequence of blinking emitters.
+function success = saveEmitterStateFull(stack)
+%saveEmitterStateFull Exports the detailed state of each emitter in each 
+%   frame to a .csv file
 %
-%Inputs:
-% Optics: struct
-% Cam: struct
-% Fluo: struct
-% Grid: struct
+%Inputs:   
+% stack [struct]
+%   - emitter_state     Boolean array of emitter states 
+%                       [Nemitters x frames]
 %
 %Outputs:
-% stack [struct]            
-%  - pixels          Discrete signal as acquired by the camera 
-%                    Image sequence [numel(x) x numel(y) x frames]
-%  - emitter_state   Boolean array of state of emitter per each frame
-%                    [N_emitters x frames]
+% success               0 if write was successful, -1 if not
 
-% Author: Marcel Stefko
 % Copyright © 2017 Laboratory of Experimental Biophysics,
-% École Polytechnique Fédérale de Lausanne
+% École Polytechnique Fédérale de Lausanne,
+% Author: Marcel Stefko
 % marcel.stefko@epfl.ch
  
 % This file is part of STORMsim, a software package for simulating 
@@ -38,13 +34,18 @@ function stacks = generateTimeTraces(Optics, Cam, Fluo, Grid)
 %
 % You should have received a copy of the GNU General Public License
 % along with STORMsim.  If not, see <http://www.gnu.org/licenses/>.
+success = -1
+[filename, pathname] = uiputfile('*.csv','Save full emitter .csv file to...');
+if filename==0
+    return
+end
+csv_filename = strcat(pathname,filename);
+file = fopen(csv_filename,'w');
+fprintf(file, '#Fluorophore states full (matlab-generated)\n');
+fprintf(file, '#No of rows (emitters): %d, no of columns (frames): %d\n',...
+    size(stack.emitter_state,1),size(stack.emitter_state,2));
+fclose(file);
+dlmwrite(csv_filename, stack.emitter_state,'-append');
 
-% conversion of time unit in frames
-Fluo.Ton = Fluo.Ton * Cam.acq_speed; 
-Fluo.Toff = Fluo.Toff * Cam.acq_speed;
-Fluo.Tbl = Fluo.Tbl * Cam.acq_speed;
-
-% time Traces of the digital signal recorded at the camera
-stacks = simStacks(Optics.frames,Optics,Cam,Fluo,Grid);
 end
 
