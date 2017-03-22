@@ -26,8 +26,8 @@ function [ Optics, Cam, Fluo, Grid ] = generatePattern(genType, Optics, Cam, Flu
 %
 % You should have received a copy of the GNU General Public License
 % along with STORMsim.  If not, see <http://www.gnu.org/licenses/>.
-type = 'number'
-def = double(Fluo.number)
+type = 'number';
+def = double(Fluo.number);
 [pattern,Fluo.emitters,nPulses,dPulses] = emitterGenRandom(def,type,Grid,Cam,Optics,genType);
 
 Fluo.number=nPulses;

@@ -46,18 +46,18 @@ switch choice
         Cam.pixel_size = 6.45 * 1e-6; % um -> [m]
 
         Fluo = struct();
-        Fluo.photons_per_second = 4000000; % signal [photons/s]
-        Fluo.number = 400; % number of fluorophores [-]
-        Fluo.duration = 6; % acquisition time [s]
-        Fluo.background = 200; % background [photons]
+        Fluo.photons_per_second = 80000;%4000000; % signal [photons/s]
+        Fluo.number = 16*400; % number of fluorophores [-]
+        Fluo.duration = 20; % acquisition time [s]
+        Fluo.background = 500/100;%50000/100; % background [photons]
         Fluo.Ton = 80 * 1e-3; % on-time ms ->[s]
         Fluo.Toff = 300 * 1e-3; % off-time ms -> [s]
-        Fluo.Tbl = 4; % bleaching time [s]
+        Fluo.Tbl = 20; % bleaching time [s]
         Fluo.radius = sqrt(64) * 1e-9; % square root of absorption cross-section nm -> [m]
 
         Grid = struct();
-        Grid.sy = 200; % [pixels]
-        Grid.sx = 200; % [pixels]
+        Grid.sy = 800; % [pixels]
+        Grid.sx = 800; % [pixels]
         
         [Optics, Cam, Fluo, Grid] = calcMaskedParameters( Optics, Cam, Fluo, Grid);
         [Optics, Cam, Fluo, Grid] = generatePattern('random',Optics, Cam, Fluo, Grid);

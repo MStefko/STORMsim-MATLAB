@@ -8,11 +8,14 @@ function stacks = generateTimeTraces(Optics, Cam, Fluo, Grid)
 % Grid: struct
 %
 %Outputs:
-% stack [struct]            
+% stacks [struct]            
 %  - pixels          Discrete signal as acquired by the camera 
 %                    Image sequence [numel(x) x numel(y) x frames]
 %  - emitter_state   Boolean array of state of emitter per each frame
 %                    [N_emitters x frames]
+%  - closest_neighbors  Array of closest distances of active fluorophores
+%                       (value is 0 if given emitter is off)
+%                       [Nemitters x frames]
 
 % Author: Marcel Stefko
 % Copyright © 2017 Laboratory of Experimental Biophysics,

@@ -6,6 +6,9 @@ function success = saveEmitterStateShort( stack )
 % stack [struct]
 %   - emitter_state     Boolean array of emitter states 
 %                       [Nemitters x frames]
+%   - closest_neighbors Array of closest distances of active fluorophores
+%                       (value is 0 if given emitter is off)
+%                       [Nemitters x frames]
 %
 %Outputs:
 % success               0 if write was successful, -1 if not
@@ -42,14 +45,22 @@ end
 csv_filename = strcat(pathname,filename);
 file = fopen(csv_filename,'w');
 fprintf(file, '#Fluorophore states short (matlab-generated)\n');
-fprintf(file, '#Frame id, no. of emitters\n')
+fprintf(file, '#Frame id, no. of emitters, min_distance [px], mean_distance [px], 10th_pctile_distance [px]\n')
 fclose(file);
-data = zeros(size(stack.emitter_state,2),2);
+data = zeros(size(stack.emitter_state,2),5);
 
 % we need to sum along columns to get total number of on emitters
 on_emitters = sum(stack.emitter_state);
-data(:,2) = on_emitters'; % mind the apostrophe for transposition
+min_distance = min(stack.closest_neighbors);
+mean_distance = mean(stack.closest_neighbors);
+p10_distance = prctile(stack.closest_neighbors,10);
+
 data(:,1) = [1:size(stack.emitter_state,2)];
+data(:,2) = on_emitters'; % mind the apostrophe for transposition
+data(:,3) = min_distance';
+data(:,4) = mean_distance';
+data(:,5) = p10_distance';
+
 dlmwrite(csv_filename, data,'-append');
 
 end
