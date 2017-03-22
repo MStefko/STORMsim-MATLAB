@@ -52,7 +52,7 @@ for f=1:frames
         % get its position in space
         v = emitter_positions(k,:);
         % arbitrary high value
-        min_dist = 10000;
+        min_dist2 = 100000000;
         % iterate over all other emitters
         for m=1:Nemitters
             % if it is off, skip it
@@ -65,14 +65,15 @@ for f=1:frames
             end
             
             % calculate distance and compare it to current minimum
-            dist = norm(v - emitter_positions(m,:));
-            if dist<min_dist
-                min_dist = dist;
+            V = (v - emitter_positions(m,:));
+            dist2 = V * V';
+            if dist2<min_dist2
+                min_dist2 = dist2;
             end
         end
         % assign the calculated minimal distance to that emitter for this
         % frame
-        distances(k,f) = min_dist;
+        distances(k,f) = sqrt(min_dist2);
     end
 end
 delete(fig);
