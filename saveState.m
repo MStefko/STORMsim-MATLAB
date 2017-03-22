@@ -1,4 +1,4 @@
-function success = saveState( Optics, Cam, Fluo, Grid )
+function success = saveState( Optics, Cam, Fluo, Grid, location)
 %UNTITLED5 Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -26,12 +26,18 @@ function success = saveState( Optics, Cam, Fluo, Grid )
 %
 % You should have received a copy of the GNU General Public License
 % along with STORMsim.  If not, see <http://www.gnu.org/licenses/>.
-success = -1
-[filename, pathname] = uiputfile('*.csv','Save .csv file to...');
-if filename==0
-    return
+if nargin == 4
+    success = -1;
+    [filename, pathname] = uiputfile('*.csv','Save .csv file to...');
+    if filename==0
+        return
+    end
+    csv_filename = strcat(pathname,filename);
+elseif nargin == 5
+    csv_filename = location;
+else
+    error('Wrong number of function arguments');
 end
-csv_filename = strcat(pathname,filename);
 success = saveFluorophoresToCsv(csv_filename,Optics,Cam,Fluo,Grid);
 end
 

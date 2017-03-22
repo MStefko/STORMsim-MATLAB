@@ -22,14 +22,51 @@
 %
 % You should have received a copy of the GNU General Public License
 % along with STORMsim.  If not, see <http://www.gnu.org/licenses/>.
-
 clear all; clc
-choice = questdlg('Open .csv file or use default settings?','Open file','Open','Default','Default');
-switch choice
-    case 'Open'
+
+dialogs = false;
+
+default_fluorophore_positions_csv_open = 'C:\\Users\\stefko\\Documents\\fluorophore_positions.csv';
+default_tifstack_save = 'C:\\Users\\stefko\\Documents\\sim_output\\image_stack.tif';
+default_state_csv_save = 'C:\\Users\\stefko\\Documents\\sim_output\\sim_state.csv';
+default_emitter_csv_save = 'C:\\Users\\stefko\\Documents\\sim_output\\emitter_state.csv';
+
+if dialogs
+    choice_opencsv = questdlg('Open .csv file or use default settings?','Open file','Open','Default','Default');
+    if strcmp(choice_opencsv,'Open')
         [filename, pathname, filterindex] = uigetfile('*.csv','Select the fluorophore .csv file.');
-        filepath = fullfile(pathname, filename);
-        [Optics, Cam, Fluo, Grid] = parseCsvFluorophoreFile(filepath);
+        fluorophore_csv = fullfile(pathname, filename);
+    end
+    
+    [filename, pathname] = uiputfile('*.tif','Save .tif stack to...');
+    if filename==0
+        return
+    end
+    tif_filepath = fullfile(pathname,filename);
+    
+    [filename, pathname] = uiputfile('*.tif','Save simulation state to...');
+    if filename==0
+        return
+    end
+    state_csv = fullfile(pathname,filename);
+    
+    [filename, pathname] = uiputfile('*.tif','Save emitter state to...');
+    if filename==0
+        return
+    end
+    emitter_csv = fullfile(pathname,filename);
+    
+else
+    choice_opencsv = 'Default';
+    fluorophore_csv = default_fluorophore_positions_csv_open;
+    tif_filepath = default_tifstack_save;
+    state_csv = default_state_csv_save;
+    emitter_csv = default_emitter_csv_save;
+end
+
+switch choice_opencsv
+    case 'Open'
+        [Optics, Cam, Fluo, Grid] = parseCsvFluorophoreFile(fluorophore_csv);
         [Optics, Cam, Fluo, Grid] = calcMaskedParameters( Optics, Cam, Fluo, Grid);
     case 'Default'
         Optics = struct();
@@ -46,9 +83,9 @@ switch choice
         Cam.pixel_size = 6.45 * 1e-6; % um -> [m]
 
         Fluo = struct();
-        Fluo.photons_per_second = 80000;%4000000; % signal [photons/s]
-        Fluo.number = 16*400; % number of fluorophores [-]
-        Fluo.duration = 20; % acquisition time [s]
+        Fluo.photons_per_second = 50000;%4000000; % signal [photons/s]
+        Fluo.number = 4*400; % number of fluorophores [-]
+        Fluo.duration = 30; % acquisition time [s]
         Fluo.background = 500/100;%50000/100; % background [photons]
         Fluo.Ton = 80 * 1e-3; % on-time ms ->[s]
         Fluo.Toff = 300 * 1e-3; % off-time ms -> [s]
@@ -56,31 +93,22 @@ switch choice
         Fluo.radius = sqrt(64) * 1e-9; % square root of absorption cross-section nm -> [m]
 
         Grid = struct();
-        Grid.sy = 800; % [pixels]
-        Grid.sx = 800; % [pixels]
+        Grid.sy = 400; % [pixels]
+        Grid.sx = 400; % [pixels]
         
         [Optics, Cam, Fluo, Grid] = calcMaskedParameters( Optics, Cam, Fluo, Grid);
         [Optics, Cam, Fluo, Grid] = generatePattern('random',Optics, Cam, Fluo, Grid);
 end
 
+stack = generateTimeTraces(Optics, Cam, Fluo, Grid);
 
+options = struct();
+options.overwrite = true;
+success = saveastiff(stack.pixels,tif_filepath, options);
 
-choice = questdlg('Generate image stack now?','Generate stack','Yes','No','No');
-if strcmp(choice,'Yes')
-    stack = generateTimeTraces(Optics, Cam, Fluo, Grid);
-    doSave = questdlg('Save .tif image stack now?','Save stack','Yes','No','No');
-    if strcmp(doSave,'Yes')
-        saveTiff(stack.pixels, Optics, Cam, Fluo, Grid);
-    end
-end
+saveState(Optics,Cam,Fluo,Grid,state_csv)
 
-choice = questdlg('Save state now?','Save state','Yes','No','No');
-if strcmp(choice,'Yes')
-    saveState(Optics,Cam,Fluo,Grid);
-end
-choice = questdlg('Save short emitter state?','Save state','Yes','No','No');
-if strcmp(choice,'Yes')
-    saveEmitterStateShort(stack);
-end
+saveEmitterStateShort(stack,emitter_csv);
+
 
 

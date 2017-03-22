@@ -23,7 +23,7 @@
 % You should have received a copy of the GNU General Public License
 % along with STORMsim.  If not, see <http://www.gnu.org/licenses/>.
 
-loadByDialogs = false;
+loadByDialogs = true;
 
 if loadByDialogs
     [filename, pathname] = uigetfile('*.csv','Load emitter csv...');
@@ -41,20 +41,24 @@ else
     emitter_csv = 'C:\\Users\\stefko\\Documents\\test3\\emitter_state.csv';
     algorithm_csv = 'C:\\Users\\stefko\\Documents\\test3\\output_algorithms.csv';
 end
+emitter_csv
+algorithm_csv
 
 alg_file = fopen(algorithm_csv,'r');
 fgetl(alg_file); % discard first line
+header_algorithm_settings = fgetl(alg_file)
+fgetl(alg_file); % discard third line
 header_algorithms = fgetl(alg_file);
 
 header = strsplit(header_algorithms,',');
 header{1} = 'real\_count';
 
 emitter_data = csvread(emitter_csv,2,0);
-algorithm_data = csvread(algorithm_csv,2,0);
+algorithm_data = csvread(algorithm_csv,4,0);
 
 algorithm_data(:,1) = emitter_data(:,2);
 normalized_data = normalizeColumnsByMean(algorithm_data);
 
-movmean_data = movmean(normalized_data, 5);
+movmean_data = movmean(normalized_data, 25);
 plot(emitter_data(:,1),movmean_data)
 legend(header)

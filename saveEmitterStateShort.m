@@ -1,4 +1,4 @@
-function success = saveEmitterStateShort( stack )
+function success = saveEmitterStateShort( stack , location)
 %saveEmitterStateShort Exports the synopsis of emitter state in each 
 %   frame to a .csv file
 %
@@ -7,7 +7,7 @@ function success = saveEmitterStateShort( stack )
 %   - emitter_state     Boolean array of emitter states 
 %                       [Nemitters x frames]
 %   - closest_neighbors Array of closest distances of active fluorophores
-%                       (value is 0 if given emitter is off)
+%                       (value is NaN if given emitter is off)
 %                       [Nemitters x frames]
 %
 %Outputs:
@@ -37,15 +37,21 @@ function success = saveEmitterStateShort( stack )
 %
 % You should have received a copy of the GNU General Public License
 % along with STORMsim.  If not, see <http://www.gnu.org/licenses/>.
-success = -1
-[filename, pathname] = uiputfile('*.csv','Save short emitter .csv file to...');
-if filename==0
-    return
+if nargin==1
+    success = -1
+    [filename, pathname] = uiputfile('*.csv','Save short emitter .csv file to...');
+    if filename==0
+        return
+    end
+    csv_filename = strcat(pathname,filename);
+elseif nargin==2
+    csv_filename = location;
+else
+    error('Wrong number of function arguments');
 end
-csv_filename = strcat(pathname,filename);
 file = fopen(csv_filename,'w');
 fprintf(file, '#Fluorophore states short (matlab-generated)\n');
-fprintf(file, '#Frame id, no. of emitters, min_distance [px], mean_distance [px], 10th_pctile_distance [px]\n')
+fprintf(file, '#Frame id, no. of emitters, min_distance [px], mean_distance [px], 10th_pctile_distance [px]\n');
 fclose(file);
 data = zeros(size(stack.emitter_state,2),5);
 

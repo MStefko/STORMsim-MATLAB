@@ -64,6 +64,8 @@ function res = saveastiff(data, path, options)
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 % POSSIBILITY OF SUCH DAMAGE.
 
+fig = statusbar('Saving tif stack...');
+
 tStart = tic;
 errcode = 0;
 try
@@ -258,6 +260,8 @@ while ~exist('tfile', 'var')
 end
 
 for d = 1:depth
+    fig = statusbar(d/depth,fig);
+    
     tfile.setTag(tagstruct);
     tfile.write(data(:, :, :, d));
     if d ~= depth
@@ -266,6 +270,7 @@ for d = 1:depth
 end
 
 tfile.close();
+delete(fig);
 if exist('path_parent', 'var'), cd(path_parent); end
 
 tElapsed = toc(tStart);

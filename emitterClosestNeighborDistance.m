@@ -8,7 +8,7 @@ function distances = emitterClosestNeighborDistance( emitter_positions, emitter_
 %
 %Outputs:
 % distances:             distance to closest on neighbor if it is on,
-%                        otherwise 0 [Nemitters x frames]
+%                        otherwise NaN [Nemitters x frames]
 
 % Author: Marcel Stefko
 % Copyright © 2017 Laboratory of Experimental Biophysics,
@@ -38,15 +38,17 @@ function distances = emitterClosestNeighborDistance( emitter_positions, emitter_
 fig = statusbar('Closest neighbor calculation...');
 
 % preallocate results array
-distances = np.zeros(size(emitter_states));
-Nemitters, frames = size(emitter_positions);
+distances = zeros(size(emitter_states));
+Nemitters = size(emitter_positions, 1);
+frames = size(emitter_positions,2);
 % each frame is independent of others
 for f=1:frames
     fig = statusbar(f/frames,fig);
     % iterate over each emitter in this frame
     for k=1:Nemitters
-        % if it is turned off, we want result to be 0, so we skip it
+        % if it is turned off, we want result to be NaN
         if not(emitter_states(k,f))
+            distances(k,f) = NaN;
             continue
         end
         % get its position in space
