@@ -58,7 +58,7 @@ data = zeros(size(stack.emitter_state,2),5);
 % we need to sum along columns to get total number of on emitters
 on_emitters = sum(stack.emitter_state);
 min_distance = min(stack.closest_neighbors);
-mean_distance = mean(stack.closest_neighbors);
+mean_distance = mean(stack.closest_neighbors,'omitnan');
 p10_distance = prctile(stack.closest_neighbors,10);
 
 data(:,1) = [1:size(stack.emitter_state,2)];
