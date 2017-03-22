@@ -40,7 +40,7 @@ fig = statusbar('Closest neighbor calculation...');
 % preallocate results array
 distances = zeros(size(emitter_states));
 Nemitters = size(emitter_positions, 1);
-frames = size(emitter_positions,2);
+frames = size(emitter_states,2);
 % each frame is independent of others
 for f=1:frames
     fig = statusbar(f/frames,fig);
@@ -68,7 +68,7 @@ for f=1:frames
             
             % calculate distance and compare it to current minimum
             V = (v - emitter_positions(m,:));
-            dist2 = V * V';
+            dist2 = V(1)*V(1) + V(2)*V(2);
             if dist2<min_dist2
                 min_dist2 = dist2;
             end

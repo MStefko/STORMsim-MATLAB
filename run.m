@@ -27,9 +27,13 @@ clear all; clc
 dialogs = false;
 
 default_fluorophore_positions_csv_open = 'C:\\Users\\stefko\\Documents\\fluorophore_positions.csv';
-default_tifstack_save = 'C:\\Users\\stefko\\Documents\\sim_output\\image_stack.tif';
-default_state_csv_save = 'C:\\Users\\stefko\\Documents\\sim_output\\sim_state.csv';
-default_emitter_csv_save = 'C:\\Users\\stefko\\Documents\\sim_output\\emitter_state.csv';
+default_folder = 'C:\\Users\\stefko\\Documents\\sim4\\';
+if 7~=exist(default_folder,'dir')
+    mkdir(default_folder);
+end
+default_tifstack_save = strcat(default_folder,'image_stack.tif');
+default_state_csv_save = strcat(default_folder,'sim_state.csv');
+default_emitter_csv_save = strcat(default_folder,'emitter_state.csv');
 
 if dialogs
     choice_opencsv = questdlg('Open .csv file or use default settings?','Open file','Open','Default','Default');
