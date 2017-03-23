@@ -27,7 +27,7 @@ clear all; clc
 dialogs = false;
 
 default_fluorophore_positions_csv_open = 'C:\\Users\\stefko\\Documents\\fluorophore_positions.csv';
-default_folder = 'C:\\Users\\stefko\\Documents\\sim4\\';
+default_folder = 'C:\\Users\\stefko\\Documents\\sim5\\';
 if 7~=exist(default_folder,'dir')
     mkdir(default_folder);
 end
