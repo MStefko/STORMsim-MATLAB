@@ -1,6 +1,6 @@
 # STORMsim
 
-MATLAB toolkit for simulating simple STORM datasets.
+MATLAB toolkit for simulating simple STORM datasets. The MATLAB version is no longer under development, for a currently developed Java implementation, see <https://github.com/MStefko/AlgorithmTester>.
 
 ## Usage
 Simulation parameters are defined in `run.m`, which also runs the simulation.
